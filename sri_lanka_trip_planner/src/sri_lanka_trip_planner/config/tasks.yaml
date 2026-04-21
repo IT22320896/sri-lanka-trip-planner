@@ -1,0 +1,43 @@
+research_task:
+  description: >
+    Analyze the user request: {user_request}. Extract origin, destination,
+    group size, trip length, and target dates. Call the tool
+    get_weather_and_attractions(destination, date) for the main destination and
+    the first travel date. Return a structured JSON summary that can feed the
+    budget and itinerary agents.
+  expected_output: >
+    JSON object with keys: origin, destination, group_size, duration_days,
+    travel_dates (list), budget_focus, weather, attractions, transport_notes,
+    assumptions, and research_sources.
+  agent: research_agent
+
+budget_task:
+  description: >
+    Use the research output to call calculate_trip_budget(people, destination, days).
+    Ensure the result is conservative and includes the written budget JSON file path.
+    Summarize any budget risks or missing inputs.
+  expected_output: >
+    JSON object with keys: budget_breakdown, total_lkr, total_usd, budget_file,
+    exchange_rate_lkr_per_usd, assumptions, and risks.
+  agent: budget_agent
+
+itinerary_task:
+  description: >
+    Combine research and budget outputs to create a structured plan_data dict.
+    Call create_itinerary_file(plan_data) to write the itinerary markdown.
+    Make sure the itinerary references the budget file path and travel dates.
+  expected_output: >
+    JSON object with keys: itinerary_path, plan_summary, budget_file, and
+    schedule_highlights.
+  agent: itinerary_agent
+
+review_task:
+  description: >
+    Validate the itinerary and realism by calling validate_plan(itinerary_path).
+    Produce the final markdown report that includes a concise summary, the
+    itinerary file path, budget highlights, validation results, and any fixes
+    or follow-ups. Keep the report clean and ready to submit.
+  expected_output: >
+    Markdown report containing Summary, Itinerary, Budget, Validation, and
+    Next Steps sections. Do not wrap in code fences.
+  agent: reviewer_agent
