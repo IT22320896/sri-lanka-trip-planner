@@ -155,7 +155,7 @@ def get_weather_and_attractions(destination: str, date: str) -> dict:
                 {
                     "latitude": str(coords["latitude"]),
                     "longitude": str(coords["longitude"]),
-                    "daily": "weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max",
+                    "daily": "weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max",
                     "timezone": "auto",
                     "start_date": trip_date.isoformat(),
                     "end_date": trip_date.isoformat(),
@@ -168,7 +168,7 @@ def get_weather_and_attractions(destination: str, date: str) -> dict:
                     "temp_max_c": daily.get("temperature_2m_max", [None])[0],
                     "temp_min_c": daily.get("temperature_2m_min", [None])[0],
                     "precip_prob_percent": daily.get("precipitation_probability_max", [None])[0],
-                    "weathercode": daily.get("weathercode", [None])[0],
+                    "weather_code": daily.get("weather_code", [None])[0],
                 }
         except Exception as exc:  # noqa: BLE001
             errors.append(f"weather_error: {exc}")
@@ -179,7 +179,7 @@ def get_weather_and_attractions(destination: str, date: str) -> dict:
             "temp_max_c": None,
             "temp_min_c": None,
             "precip_prob_percent": None,
-            "weathercode": None,
+            "weather_code": None,
         }
 
     attractions: List[Dict[str, str]] = []

@@ -4,6 +4,7 @@ from crewai import LLM, Agent, Crew, Process, Task
 from crewai.agents.agent_builder.base_agent import BaseAgent
 from crewai.memory.unified_memory import Memory
 from crewai.project import CrewBase, agent, crew, task
+from crewai.rag.embeddings.factory import build_embedder_from_provider
 from crewai.rag.embeddings.providers.ollama.ollama_provider import OllamaProvider
 
 from sri_lanka_trip_planner.tools import (
@@ -91,10 +92,11 @@ class SriLankaTripPlanner:
             or os.getenv("API_BASE")
             or "http://localhost:11434"
         )
-        embedder = OllamaProvider(**{
+        provider = OllamaProvider(**{
             "model": "nomic-embed-text",
             "url": f"{base_url}/api/embeddings",
         })
+        embedder = build_embedder_from_provider(provider)
         llm = LLM(model="ollama/llama3.1:8b", base_url=base_url)
         return Memory(embedder=embedder, llm=llm)
 
