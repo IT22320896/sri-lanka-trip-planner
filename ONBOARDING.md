@@ -30,35 +30,39 @@ venv\Scripts\activate
 source venv/bin/activate
 ```
 
-3. Install the required packages (the same ones used during setup):
-
-```
-pip install crewai crewai-tools langchain-ollama
-```
-
-4. Move into the project folder (the repo already contains it):
+3. Move into the project folder (the repo already contains it):
 
 ```
 cd sri_lanka_trip_planner
 ```
 
-5. Create your local environment file:
+4. Install the project in editable mode with all dependencies:
+
+```
+pip install -e .
+```
+
+5. Pull the Ollama models:
+
+```
+ollama pull qwen3.5:9b
+ollama pull nomic-embed-text
+```
+
+6. Create your local environment file:
 
 ```
 copy .env.example .env
 ```
 
-6. Pull and serve the Ollama model:
-
-```
-ollama pull llama3.1:8b
-ollama serve
-```
+Note: Ollama typically runs as a background service on Windows. Check the system tray for the Ollama icon. No need to run `ollama serve` manually if it's already running.
 
 ## Run the planner
 
+Make sure you're in the `sri_lanka_trip_planner` folder with the venv activated, then:
+
 ```
-python -m sri_lanka_trip_planner.main "Plan a cheap 2-day trip from Colombo to Kandy for 4 people next weekend"
+sri_lanka_trip_planner "Plan a cheap 2-day trip from Colombo to Kandy for 4 people next weekend"
 ```
 
 ## Outputs

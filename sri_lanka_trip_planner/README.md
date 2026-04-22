@@ -20,7 +20,7 @@ produces a markdown report, a budget JSON file, and a detailed itinerary file.
 - Python 3.10+
 - Ollama installed locally
 - Models:
-  - `llama3.1:8b` — main LLM for all agents (~4.7 GB)
+  - `qwen3.5:9b` — main LLM for all agents (~5.5 GB)
   - `nomic-embed-text` — local embedder for crew memory (~274 MB)
 
 ## Setup
@@ -36,7 +36,7 @@ pip install -r requirements.txt
 2. Pull the Ollama models:
 
 ```bash
-ollama pull llama3.1:8b
+ollama pull qwen3.5:9b
 ollama pull nomic-embed-text
 ```
 
@@ -64,6 +64,14 @@ sri_lanka_trip_planner "Plan a cheap 2-day trip from Colombo to Kandy for 4 peop
 - outputs/budget\_\*.json
 - outputs/itinerary\_\*.md
 
+## Model Configuration
+
+The system uses `qwen3.5:9b` for better tool-calling reliability. The model is configured via:
+- `.env` file (`OLLAMA_MODEL=qwen3.5:9b`)
+- Automatically overrides the placeholder `llama3.1:8b` in `agents.yaml`
+
+To switch models, just update `OLLAMA_MODEL` in your `.env` file.
+
 ## Observability
 
 - Crew and agents run with verbose=True
@@ -78,9 +86,10 @@ pytest -q
 
 ## Assignment Compliance
 
-- Ollama model configured for llama3.1:8b
+- Ollama model configured for qwen3.5:9b (better tool-calling than llama3.1:8b)
 - 4 distinct agents and 4 sequential tasks
 - One custom tool per agent with strict type hints and detailed docstrings
 - Real-world tool interactions (file I/O + public APIs)
 - Shared state passed through task outputs + crew memory
 - Full logging and output files for reporting
+- Comprehensive test suite with 45+ tests covering edge cases and security
