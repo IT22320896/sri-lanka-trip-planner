@@ -19,7 +19,9 @@ produces a markdown report, a budget JSON file, and a detailed itinerary file.
 
 - Python 3.10+
 - Ollama installed locally
-- Model: llama3.1:8b (or llama3:8b)
+- Models:
+  - `llama3.1:8b` — main LLM for all agents (~4.7 GB)
+  - `nomic-embed-text` — local embedder for crew memory (~274 MB)
 
 ## Setup
 
@@ -31,14 +33,20 @@ source venv/Scripts/activate
 pip install -r requirements.txt
 ```
 
-2. Pull and run the Ollama model:
+2. Pull the Ollama models:
 
 ```bash
 ollama pull llama3.1:8b
+ollama pull nomic-embed-text
+```
+
+3. Start the Ollama server (if not already running):
+
+```bash
 ollama serve
 ```
 
-3. Configure environment variables:
+4. Configure environment variables:
 
 ```bash
 copy .env.example .env
@@ -47,7 +55,7 @@ copy .env.example .env
 ## Run the Planner
 
 ```bash
-python -m sri_lanka_trip_planner.main "Plan a cheap 2-day trip from Colombo to Kandy for 4 people next weekend"
+sri_lanka_trip_planner "Plan a cheap 2-day trip from Colombo to Kandy for 4 people next weekend"
 ```
 
 ## Outputs
@@ -58,9 +66,9 @@ python -m sri_lanka_trip_planner.main "Plan a cheap 2-day trip from Colombo to K
 
 ## Observability
 
-- Crew and agents run with verbose=2
+- Crew and agents run with verbose=True
 - Tools emit explicit print logs for every call and output
-- Shared memory is enabled at the crew level
+- Shared memory is enabled at the crew level using local Ollama models (no OpenAI key required)
 
 ## Testing
 

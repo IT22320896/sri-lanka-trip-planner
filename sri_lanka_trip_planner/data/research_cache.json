@@ -1,0 +1,48 @@
+{
+  "kandy|2024-01-06": {
+    "destination": "Kandy",
+    "date": "2024-01-06",
+    "coordinates": {
+      "latitude": 7.2906,
+      "longitude": 80.6336
+    },
+    "weather": {
+      "date": "2024-01-06",
+      "temp_max_c": null,
+      "temp_min_c": null,
+      "precip_prob_percent": null,
+      "weathercode": null
+    },
+    "attractions": [
+      {
+        "title": "Kandy Esala Perahera",
+        "snippet": "The Kandy Esala Perahera (the Sri Dalada Perahara procession of Kandy) also known as The Festival of the Tooth, is an annual religious and cultural festival"
+      },
+      {
+        "title": "Queen's Hotel, Kandy",
+        "snippet": "capital Kandy in Sri Lanka. Located in the center of the city at end of the main street, this former Governor&#039;s residence is one of the oldest hotels in Sri"
+      },
+      {
+        "title": "Temple of the Tooth",
+        "snippet": "Maligawa, commonly known in English as the Temple of the Sacred Tooth Relic, is a Buddhist temple in Kandy, Sri Lanka. It is located in the Royal Palace Complex"
+      },
+      {
+        "title": "Kandy Lake",
+        "snippet": "Kandy Lake (Sinhala: \u0db1\u0dd4\u0dc0\u0dbb \u0dc0\u0dd0\u0dc0), also known as Kiri Muhuda or the Sea of Milk, is an artificial lake in the heart of the hill city of Kandy, Sri Lanka,"
+      },
+      {
+        "title": "Naula",
+        "snippet": "town in Sri Lanka. It is located within Matale district, Central Province. It is located in A9 road (Kandy-Jaffna) about 53 kilometers from Kandy. It is"
+      }
+    ],
+    "sources": {
+      "geocode": "https://geocoding-api.open-meteo.com/v1/search",
+      "weather": "https://api.open-meteo.com/v1/forecast",
+      "wikipedia": "https://en.wikipedia.org/w/api.php"
+    },
+    "errors": [
+      "weather_error: 400 Client Error: Bad Request for url: https://api.open-meteo.com/v1/forecast?latitude=7.2906&longitude=80.6336&daily=weathercode%2Ctemperature_2m_max%2Ctemperature_2m_min%2Cprecipitation_probability_max&timezone=auto&start_date=2024-01-06&end_date=2024-01-06"
+    ],
+    "cached": false
+  }
+}
