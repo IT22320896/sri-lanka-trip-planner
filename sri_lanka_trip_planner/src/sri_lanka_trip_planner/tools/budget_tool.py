@@ -15,11 +15,11 @@ EXCHANGE_URL = "https://api.exchangerate.host/latest"
 FALLBACK_LKR_PER_USD = 320.0
 
 PER_PERSON_LKR_BY_DESTINATION: Dict[str, int] = {
-    "colombo": 16000,
-    "kandy": 12000,
-    "galle": 14000,
+    "colombo": 10000,
+    "kandy": 4000,
+    "galle": 10000,
     "ella": 13000,
-    "sigiriya": 15000,
+    "sigiriya": 5000,
 }
 
 

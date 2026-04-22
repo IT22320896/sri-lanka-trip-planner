@@ -132,7 +132,9 @@ def create_itinerary_file(plan_data: dict) -> str:
     print(f"[itinerary_tool] Itinerary written to {output_path}")
 
     state_path = output_dir / "latest_plan.json"
-    state_path.write_text(json.dumps(plan_data, indent=2), encoding="utf-8")
+    plan_data_with_path = dict(plan_data)
+    plan_data_with_path["itinerary_path"] = str(output_path)
+    state_path.write_text(json.dumps(plan_data_with_path, indent=2), encoding="utf-8")
     return str(output_path)
 
 

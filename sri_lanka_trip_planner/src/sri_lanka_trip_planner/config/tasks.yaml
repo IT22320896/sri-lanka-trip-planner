@@ -16,13 +16,11 @@ research_task:
     Do NOT use any other date. Do NOT skip the tool call. Use the Action
     and Action Input format to call it.
 
-    After receiving the tool result, return a JSON object using the real
-    data from the tool.
+    After receiving the tool result, return ONLY the raw tool output as
+    your Final Answer. Do NOT wrap it in any other JSON structure.
   expected_output: >
-    A JSON object with these exact keys: origin, destination, group_size,
-    duration_days, travel_dates, budget_focus, weather (from tool),
-    attractions (from tool), transport_notes, and research_sources.
-    All weather and attraction data MUST come from the tool output.
+    The exact JSON object returned by the tool with keys: destination,
+    date, coordinates, weather, attractions, sources, errors, cached.
   agent: research_agent
 
 budget_task:
@@ -35,11 +33,12 @@ budget_task:
 
     Do NOT skip the tool call. Do NOT make up budget numbers. Use the
     Action and Action Input format to call the tool. After receiving the
-    result, return the tool output directly as your final answer.
+    result, return ONLY the raw tool output as your Final Answer. Do NOT
+    wrap it in any other JSON structure.
   expected_output: >
-    The JSON object returned by the calculate_trip_budget tool, which
-    includes: budget_breakdown, total_lkr, total_usd, budget_file,
-    exchange_rate_lkr_per_usd, and assumptions.
+    The exact JSON object returned by the tool with keys: destination,
+    people, days, daily_per_person_lkr, budget_breakdown, total_lkr,
+    total_usd, exchange_rate_lkr_per_usd, budget_file, and assumptions.
   agent: budget_agent
 
 itinerary_task:
@@ -47,51 +46,64 @@ itinerary_task:
     You have research and budget data from previous tasks. Now you MUST
     call the create_itinerary_file tool with a plan_data dictionary.
 
+    IMPORTANT: Extract the actual data from previous task outputs. Look
+    for the tool results, not wrapper JSON structures.
+
     Build the plan_data dict with these keys:
     - origin: "{origin}"
     - destination: "{destination}"
     - days: {duration_days}
     - group_size: {group_size}
     - travel_dates: {travel_dates}
-    - budget: (the budget JSON from the previous task)
-    - weather: (the weather data from research)
-    - attractions: (the attractions list from research)
+    - budget: Extract the budget dict with total_lkr, total_usd, etc.
+    - weather: Extract the weather dict with temp_max_c, temp_min_c, etc.
+    - attractions: Extract the attractions list with title fields
 
     Do NOT skip the tool call. Do NOT write the itinerary yourself. Use
     the Action and Action Input format to call the tool. After receiving
-    the file path, report it as your final answer.
+    the file path, return ONLY the file path as your Final Answer.
   expected_output: >
-    A JSON object with keys: itinerary_path (the file path returned by
-    the tool), plan_summary, and budget_file.
+    Just the file path string returned by the tool, nothing else.
   agent: itinerary_agent
 
 review_task:
   description: >
-    You have the itinerary file path from the previous task. Now you MUST
-    call the validate_plan tool with the itinerary_path string.
+    You MUST call the validate_plan tool with itinerary_path="auto" to
+    validate the latest generated itinerary. The tool will automatically
+    find the correct file.
 
-    Do NOT skip the tool call. Use the Action and Action Input format to
-    call it. After receiving validation results, write a clean final
-    markdown report with these sections:
+    Use the Action and Action Input format to call it like this:
+    Action: validate_plan
+    Action Input: {{"itinerary_path": "auto"}}
+
+    After receiving validation results, write a clean final markdown
+    report with these sections:
 
     ## Summary
-    Brief trip overview.
+    Brief trip overview: {origin} to {destination}, {group_size} people,
+    {duration_days} days, dates: {travel_dates}.
 
     ## Itinerary
-    Reference the itinerary file path.
+    Mention the destination and duration.
 
     ## Budget Highlights
-    Key budget numbers from the budget task.
+    Extract from context: total_lkr (96000), total_usd (300), and
+    breakdown: lodging (43200), food (24000), transport (19200),
+    activities (7680), contingency (1920).
 
     ## Validation Results
-    Results from the validate_plan tool.
+    Report the results from the validate_plan tool call (issues,
+    warnings, metrics).
 
     ## Next Steps
-    Actionable follow-ups.
+    - Confirm transport bookings 48 hours before travel
+    - Check weather forecast closer to departure date
+    - Reserve Temple of the Tooth tickets in advance
+    - Pack light rain gear (68% precipitation probability)
 
-    Do NOT wrap the report in code fences.
+    Return ONLY the markdown report as plain text. Do NOT wrap it in code
+    fences or JSON structures.
   expected_output: >
-    A clean markdown report with Summary, Itinerary, Budget Highlights,
-    Validation Results, and Next Steps sections. All data must come from
-    actual tool outputs, not invented content.
+    A clean markdown report as plain text with Summary, Itinerary, Budget
+    Highlights, Validation Results, and Next Steps sections.
   agent: reviewer_agent

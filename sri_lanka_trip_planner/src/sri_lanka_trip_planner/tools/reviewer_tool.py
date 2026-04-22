@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import re
 from datetime import datetime
 from pathlib import Path
@@ -9,11 +10,40 @@ from crewai.tools import BaseTool
 from pydantic import BaseModel, Field
 
 
+def _project_root() -> Path:
+    current = Path(__file__).resolve()
+    for parent in current.parents:
+        if (parent / "pyproject.toml").exists():
+            return parent
+    return current.parents[4]
+
+
+def _get_latest_itinerary_path() -> str:
+    """Get the latest itinerary path from latest_plan.json."""
+    output_dir = _project_root() / "outputs"
+    latest_plan_file = output_dir / "latest_plan.json"
+    
+    if latest_plan_file.exists():
+        data = json.loads(latest_plan_file.read_text(encoding="utf-8"))
+        if "itinerary_path" in data:
+            return data["itinerary_path"]
+    
+    # Fallback: find the most recent itinerary file
+    itinerary_files = list(output_dir.glob("itinerary_*.md"))
+    if itinerary_files:
+        latest = max(itinerary_files, key=lambda p: p.stat().st_mtime)
+        return str(latest)
+    
+    raise FileNotFoundError("No itinerary files found in outputs directory")
+
+
 def validate_plan(itinerary_path: str) -> dict:
     """Validate itinerary realism, timing, and budget hints.
 
     Args:
-        itinerary_path: Path to the itinerary markdown file.
+        itinerary_path: Path to the itinerary markdown file. If this is a
+            placeholder like "/path/to/itinerary.md" or "auto", the function
+            will automatically find the latest itinerary.
 
     Returns:
         A dictionary with validation issues, warnings, and metrics.
@@ -21,9 +51,22 @@ def validate_plan(itinerary_path: str) -> dict:
     Raises:
         FileNotFoundError: If the itinerary file does not exist.
     """
+    # Auto-detect if placeholder path is provided
+    if itinerary_path in ("/path/to/itinerary.md", "auto", "latest") or not itinerary_path:
+        print(f"[reviewer_tool] Placeholder path detected, finding latest itinerary...")
+        itinerary_path = _get_latest_itinerary_path()
+        print(f"[reviewer_tool] Using: {itinerary_path}")
+    
     path = Path(itinerary_path)
     if not path.exists():
-        raise FileNotFoundError(f"Itinerary file not found: {itinerary_path}")
+        # Try to find the latest as fallback
+        try:
+            print(f"[reviewer_tool] Path not found, trying to find latest...")
+            itinerary_path = _get_latest_itinerary_path()
+            path = Path(itinerary_path)
+            print(f"[reviewer_tool] Using: {itinerary_path}")
+        except FileNotFoundError:
+            raise FileNotFoundError(f"Itinerary file not found: {itinerary_path}")
 
     content = path.read_text(encoding="utf-8")
     day_sections = re.split(r"^## Day\s+\d+\s*-", content, flags=re.MULTILINE)
