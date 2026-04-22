@@ -8,10 +8,7 @@ research_agent:
     accessible sources. You prefer structured findings, cite what you checked,
     and summarize only what you can confidently support.
   allow_delegation: false
-  llm:
-    model: ollama/llama3.1:8b
-    base_url: http://localhost:11434
-    temperature: 0.2
+  llm: ollama/llama3.1:8b
 
 budget_agent:
   role: >
@@ -22,10 +19,7 @@ budget_agent:
     You are a no-nonsense accountant. You always round up, document assumptions,
     and ensure every cost line item is realistic for Sri Lanka travel.
   allow_delegation: false
-  llm:
-    model: ollama/llama3.1:8b
-    base_url: http://localhost:11434
-    temperature: 0.2
+  llm: ollama/llama3.1:8b
 
 itinerary_agent:
   role: >
@@ -36,10 +30,7 @@ itinerary_agent:
     You love calendars, buffers, and realistic pacing. You always include travel
     time, meal breaks, and recovery windows.
   allow_delegation: false
-  llm:
-    model: ollama/llama3.1:8b
-    base_url: http://localhost:11434
-    temperature: 0.2
+  llm: ollama/llama3.1:8b
 
 reviewer_agent:
   role: >
@@ -50,7 +41,4 @@ reviewer_agent:
     You are the final quality gate. You look for missing details, improbable
     schedules, and unclear outputs, then request fixes when needed.
   allow_delegation: false
-  llm:
-    model: ollama/llama3.1:8b
-    base_url: http://localhost:11434
-    temperature: 0.2
+  llm: ollama/llama3.1:8b
