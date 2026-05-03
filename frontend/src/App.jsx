@@ -10,6 +10,71 @@ const emptyResult = {
   errors: [],
 };
 
+async function parseErrorResponse(response) {
+  const text = await response.text();
+  try {
+    const json = JSON.parse(text);
+    if (json?.detail) {
+      return typeof json.detail === "string"
+        ? json.detail
+        : JSON.stringify(json.detail);
+    }
+  } catch {
+    /* plain text */
+  }
+  return text || `Request failed (${response.status})`;
+}
+
+function OutputDisplay({ result, status }) {
+  const report = result.final_report_md?.trim() || "";
+  const itinerary = result.itinerary_md?.trim() || "";
+  const budget = result.budget_json;
+
+  const hasAnything = Boolean(report || itinerary || budget);
+
+  if (status === "success" && !hasAnything) {
+    return (
+      <p className="muted">
+        Nothing was returned. Check the server <code>outputs/</code> folder or
+        logs.
+      </p>
+    );
+  }
+
+  if (!hasAnything) {
+    return null;
+  }
+
+  return (
+    <div className="output-stack">
+      {report ? (
+        <section className="output-section">
+          <h3>Final report</h3>
+          <pre className="output-plain">{result.final_report_md}</pre>
+        </section>
+      ) : null}
+
+      {itinerary ? (
+        <section className="output-section">
+          <h3>Itinerary</h3>
+          <pre className="output-plain">{result.itinerary_md}</pre>
+        </section>
+      ) : null}
+
+      {budget ? (
+        <section className="output-section">
+          <h3>Budget</h3>
+          <pre className="output-plain">
+            {typeof budget === "object"
+              ? JSON.stringify(budget, null, 2)
+              : String(budget)}
+          </pre>
+        </section>
+      ) : null}
+    </div>
+  );
+}
+
 export default function App() {
   const [prompt, setPrompt] = useState(
     "Plan a cheap 2-day trip from Colombo to Kandy for 4 people next weekend",
@@ -34,8 +99,7 @@ export default function App() {
       });
 
       if (!response.ok) {
-        const message = await response.text();
-        throw new Error(message || "Failed to generate plan");
+        throw new Error(await parseErrorResponse(response));
       }
 
       const data = await response.json();
@@ -55,6 +119,13 @@ export default function App() {
       });
     }
   };
+
+  const showOutput =
+    status === "loading" ||
+    status === "success" ||
+    result.final_report_md ||
+    result.itinerary_md ||
+    result.budget_json;
 
   return (
     <div className="page">
@@ -102,9 +173,14 @@ export default function App() {
             <span className={`status ${status}`}>{status}</span>
           </div>
 
-          <article className="output-block">
-            {result.final_report_md ? (
-              <pre>{result.final_report_md}</pre>
+          <article className="output-block output-block-scroll">
+            {status === "loading" ? (
+              <p className="muted loading-copy">
+                Running the crew (research → budget → itinerary → review). This
+                can take a minute on local models…
+              </p>
+            ) : showOutput ? (
+              <OutputDisplay result={result} status={status} />
             ) : (
               <p className="muted">Run a prompt to see the output.</p>
             )}

@@ -7,7 +7,9 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 from crewai.tools import BaseTool
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
+
+from sri_lanka_trip_planner.tools.schema_utils import normalize_dict_keys
 
 DEFAULT_DAY_TIMES = ["08:00", "10:30", "13:00", "15:30", "18:00"]
 
@@ -142,6 +144,11 @@ class ItineraryToolInput(BaseModel):
     """Input schema for create_itinerary_file."""
 
     plan_data: Dict[str, Any] = Field(..., description="Structured trip plan data.")
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_arg_keys(cls, data: Any) -> Any:
+        return normalize_dict_keys(data, ("plan_data",))
 
 
 class ItineraryTool(BaseTool):

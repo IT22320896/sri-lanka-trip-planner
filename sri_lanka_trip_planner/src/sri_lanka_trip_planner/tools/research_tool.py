@@ -9,7 +9,9 @@ from typing import Any, Dict, List, Optional
 
 import requests
 from crewai.tools import BaseTool
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
+
+from sri_lanka_trip_planner.tools.schema_utils import normalize_dict_keys
 
 USER_AGENT = "sri-lanka-trip-planner/1.0"
 GEOCODE_URL = "https://geocoding-api.open-meteo.com/v1/search"
@@ -233,6 +235,11 @@ class ResearchToolInput(BaseModel):
 
     destination: str = Field(..., description="Destination city or region.")
     date: str = Field(..., description="Trip date in YYYY-MM-DD format.")
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_arg_keys(cls, data: Any) -> Any:
+        return normalize_dict_keys(data, ("destination", "date"))
 
 
 class ResearchTool(BaseTool):

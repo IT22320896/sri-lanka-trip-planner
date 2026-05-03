@@ -1,2 +1,30 @@
 venv/
 .venv/
+
+# Generated crew/API outputs (itineraries .md, budgets .json, final_report.md, latest_plan.json)
+sri_lanka_trip_planner/outputs/
+
+# Local research cache (regenerated at runtime)
+sri_lanka_trip_planner/data/research_cache.json
+
+# Environment and secrets
+.env
+.env.*
+
+# Frontend build & deps
+frontend/node_modules/
+frontend/dist/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# OS
+.DS_Store
+Thumbs.db

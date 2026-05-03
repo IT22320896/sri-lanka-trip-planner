@@ -190,8 +190,34 @@ pre {
   border-radius: 12px;
   padding: 12px;
   overflow-x: auto;
-  max-height: 320px;
   white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.output-block-scroll {
+  max-height: min(70vh, 720px);
+  overflow-y: auto;
+}
+
+.output-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.output-section h3 {
+  font-family: "Fraunces", serif;
+  font-size: 1.1rem;
+  margin: 0 0 10px;
+  color: var(--ink);
+}
+
+.output-plain {
+  margin: 0;
+  font-family: inherit;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  max-height: none;
 }
 
 .muted {

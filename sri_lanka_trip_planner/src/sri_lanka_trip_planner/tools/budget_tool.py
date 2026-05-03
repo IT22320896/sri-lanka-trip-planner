@@ -9,7 +9,9 @@ from typing import Any, Dict
 
 import requests
 from crewai.tools import BaseTool
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
+
+from sri_lanka_trip_planner.tools.schema_utils import normalize_dict_keys
 
 EXCHANGE_URL = "https://api.exchangerate.host/latest"
 FALLBACK_LKR_PER_USD = 320.0
@@ -138,6 +140,11 @@ class BudgetToolInput(BaseModel):
     people: int = Field(..., description="Number of travelers.")
     destination: str = Field(..., description="Primary destination.")
     days: int = Field(..., description="Trip length in days.")
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_arg_keys(cls, data: Any) -> Any:
+        return normalize_dict_keys(data, ("people", "destination", "days"))
 
 
 class BudgetTool(BaseTool):

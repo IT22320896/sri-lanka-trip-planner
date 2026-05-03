@@ -2,10 +2,7 @@ import os
 
 from crewai import LLM, Agent, Crew, Process, Task
 from crewai.agents.agent_builder.base_agent import BaseAgent
-from crewai.memory.unified_memory import Memory
 from crewai.project import CrewBase, agent, crew, task
-from crewai.rag.embeddings.factory import build_embedder_from_provider
-from crewai.rag.embeddings.providers.ollama.ollama_provider import OllamaProvider
 
 from sri_lanka_trip_planner.tools import (
     BudgetTool,
@@ -86,27 +83,15 @@ class SriLankaTripPlanner:
             output_file="outputs/final_report.md",
         )
 
-    def _local_memory(self) -> Memory:
-        base_url = (
-            os.getenv("OLLAMA_BASE_URL")
-            or os.getenv("API_BASE")
-            or "http://localhost:11434"
-        )
-        provider = OllamaProvider(**{
-            "model": "nomic-embed-text",
-            "url": f"{base_url}/api/embeddings",
-        })
-        embedder = build_embedder_from_provider(provider)
-        llm = LLM(model="ollama/llama3.1:8b", base_url=base_url)
-        return Memory(embedder=embedder, llm=llm)
-
     @crew
     def crew(self) -> Crew:
         print("[crew] Initializing Sri Lanka Weekend Trip Planner crew")
+        # memory=False: no extra LLM for unified memory (reduces Ollama load; logs use
+        # OpenAI-compatible client strings). Context flows via sequential task outputs.
         return Crew(
             agents=self.agents,
             tasks=self.tasks,
             process=Process.sequential,
-            memory=self._local_memory(),
+            memory=False,
             verbose=True,
         )

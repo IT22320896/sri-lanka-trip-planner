@@ -4,10 +4,12 @@ import json
 import re
 from datetime import datetime
 from pathlib import Path
-from typing import List
+from typing import Any, List
 
 from crewai.tools import BaseTool
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
+
+from sri_lanka_trip_planner.tools.schema_utils import normalize_dict_keys
 
 
 def _project_root() -> Path:
@@ -59,14 +61,7 @@ def validate_plan(itinerary_path: str) -> dict:
     
     path = Path(itinerary_path)
     if not path.exists():
-        # Try to find the latest as fallback
-        try:
-            print(f"[reviewer_tool] Path not found, trying to find latest...")
-            itinerary_path = _get_latest_itinerary_path()
-            path = Path(itinerary_path)
-            print(f"[reviewer_tool] Using: {itinerary_path}")
-        except FileNotFoundError:
-            raise FileNotFoundError(f"Itinerary file not found: {itinerary_path}")
+        raise FileNotFoundError(f"Itinerary file not found: {itinerary_path}")
 
     content = path.read_text(encoding="utf-8")
     day_sections = re.split(r"^## Day\s+\d+\s*-", content, flags=re.MULTILINE)
@@ -126,6 +121,11 @@ class ReviewerToolInput(BaseModel):
     """Input schema for validate_plan."""
 
     itinerary_path: str = Field(..., description="Path to the itinerary markdown file.")
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_arg_keys(cls, data: Any) -> Any:
+        return normalize_dict_keys(data, ("itinerary_path",))
 
 
 class ReviewerTool(BaseTool):
