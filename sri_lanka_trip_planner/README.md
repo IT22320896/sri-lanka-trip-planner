@@ -58,6 +58,26 @@ copy .env.example .env
 sri_lanka_trip_planner "Plan a cheap 2-day trip from Colombo to Kandy for 4 people next weekend"
 ```
 
+## Local API + React Frontend
+
+Start the API server:
+
+```bash
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+ollama serve
+python -m uvicorn sri_lanka_trip_planner.api:app --reload --port 8000
+```
+
+Start the React app:
+
+```bash
+cd ..\frontend
+npm install
+npm run dev
+```
+
 ## Outputs
 
 - outputs/final_report.md
