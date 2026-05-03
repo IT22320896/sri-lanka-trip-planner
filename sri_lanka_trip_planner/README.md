@@ -36,7 +36,7 @@ pip install -r requirements.txt
 2. Pull the Ollama models:
 
 ```bash
-ollama pull llama3.1:8b
+ollama pull qwen3.5:9b
 ollama pull nomic-embed-text
 ```
 
