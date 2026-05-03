@@ -1,6 +1,8 @@
 import { useState } from "react";
 
-const API_BASE = "http://localhost:8000";
+// Read backend URL from Vite environment variable `VITE_API_BASE` so it can be
+// changed at deploy time. Falls back to localhost for local development.
+const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8000";
 
 const emptyResult = {
   final_report_md: "",
