@@ -12,8 +12,9 @@ research_agent:
     destination and date provided in the task. After calling the tool,
     return the tool output DIRECTLY without wrapping it in any other
     structure. Your Final Answer should be the raw JSON from the tool.
+    Never respond with a different tool name or invented JSON schema.
   allow_delegation: false
-  max_iter: 3
+  max_iter: 5
   llm: ollama/llama3.1:8b
 
 budget_agent:
@@ -47,8 +48,10 @@ itinerary_agent:
     You never write the itinerary yourself. If you do not call the tool,
     your answer is considered a failure. After calling the tool, return
     ONLY the file path string as your Final Answer.
+    Never invent a Windows path or Documents path — only the path returned
+    by the tool.
   allow_delegation: false
-  max_iter: 3
+  max_iter: 8
   llm: ollama/llama3.1:8b
 
 reviewer_agent:

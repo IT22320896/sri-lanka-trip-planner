@@ -9,6 +9,10 @@ from typing import Dict, List, Optional
 from dotenv import load_dotenv
 
 from sri_lanka_trip_planner.crew import SriLankaTripPlanner
+from sri_lanka_trip_planner.task_guardrails import (
+    repair_itinerary_after_kickoff,
+    set_kickoff_inputs,
+)
 
 warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 
@@ -59,15 +63,18 @@ def _parse_request(user_request: str) -> Dict[str, Optional[str]]:
 def build_inputs(user_request: str) -> dict:
     parsed = _parse_request(user_request)
     travel_dates = parsed.get("travel_dates")
+    dates_list = travel_dates.split(",") if travel_dates else []
+    weather_date = dates_list[0] if dates_list else date.today().isoformat()
     return {
         "user_request": user_request,
         "origin": parsed.get("origin") or "",
         "destination": parsed.get("destination") or "",
         "group_size": parsed.get("people") or "",
         "duration_days": parsed.get("days") or "",
-        "travel_dates": travel_dates.split(",") if travel_dates else [],
+        "travel_dates": dates_list,
         "budget_focus": parsed.get("budget_focus") or "",
         "current_date": date.today().isoformat(),
+        "weather_date": weather_date,
     }
 
 
@@ -82,7 +89,9 @@ def run() -> None:
     print("[main] Kickoff inputs:\n" + json.dumps(inputs, indent=2))
 
     try:
+        set_kickoff_inputs(inputs)
         result = SriLankaTripPlanner().crew().kickoff(inputs=inputs)
+        repair_itinerary_after_kickoff(result)
         print("[main] Final result:\n", result)
     except Exception as exc:  # noqa: BLE001
         raise Exception(f"An error occurred while running the crew: {exc}")
@@ -93,6 +102,7 @@ def train() -> None:
     load_dotenv()
     sample_request = "Plan a cheap 2-day trip from Colombo to Kandy for 4 people next weekend"
     inputs = build_inputs(sample_request)
+    set_kickoff_inputs(inputs)
     try:
         SriLankaTripPlanner().crew().train(
             n_iterations=int(sys.argv[1]),
@@ -116,6 +126,7 @@ def test() -> None:
     load_dotenv()
     sample_request = "Plan a cheap 2-day trip from Colombo to Kandy for 4 people next weekend"
     inputs = build_inputs(sample_request)
+    set_kickoff_inputs(inputs)
     try:
         SriLankaTripPlanner().crew().test(
             n_iterations=int(sys.argv[1]),
@@ -146,10 +157,13 @@ def run_with_trigger() -> None:
         "travel_dates": [],
         "budget_focus": "",
         "current_date": "",
+        "weather_date": "",
     }
 
     try:
+        set_kickoff_inputs(inputs)
         result = SriLankaTripPlanner().crew().kickoff(inputs=inputs)
+        repair_itinerary_after_kickoff(result)
         print("[main] Trigger result:\n", result)
     except Exception as exc:  # noqa: BLE001
         raise Exception(f"An error occurred while running the crew with trigger: {exc}")

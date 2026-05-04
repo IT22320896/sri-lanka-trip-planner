@@ -12,12 +12,13 @@ research_task:
     - Current date: {current_date}
 
     IMPORTANT: You MUST call the get_weather_and_attractions tool exactly
-    once with destination="{destination}" and date="{current_date}".
-    Do NOT use any other date. Do NOT skip the tool call. Use the Action
-    and Action Input format to call it.
+    once with destination="{destination}" and date="{weather_date}".
+    Use that exact date string for the forecast day (first trip day).
+    Do NOT skip the tool call. Use Action / Action Input.
 
-    After receiving the tool result, return ONLY the raw tool output as
-    your Final Answer. Do NOT wrap it in any other JSON structure.
+    After the tool returns, your Final Answer MUST be ONLY the raw JSON the
+    tool returned — the same keys as in Tool Output. Do NOT invent another
+    JSON schema. Do NOT output function-call JSON like {{"name": ...}}.
   expected_output: >
     The exact JSON object returned by the tool with keys: destination,
     date, coordinates, weather, attractions, sources, errors, cached.
@@ -44,65 +45,58 @@ budget_task:
 itinerary_task:
   description: >
     You have research and budget data from previous tasks. Now you MUST
-    call the create_itinerary_file tool with a plan_data dictionary.
+    call the create_itinerary_file tool exactly once with argument plan_data.
 
-    IMPORTANT: Extract the actual data from previous task outputs. Look
-    for the tool results, not wrapper JSON structures.
+    Extract JSON from previous outputs: research gives weather + attractions;
+    budget gives total_lkr, budget_file, budget_breakdown.
 
-    Build the plan_data dict with these keys:
+    Build plan_data with keys:
     - origin: "{origin}"
     - destination: "{destination}"
     - days: {duration_days}
     - group_size: {group_size}
     - travel_dates: {travel_dates}
-    - budget: Extract the budget dict with total_lkr, total_usd, etc.
-    - weather: Extract the weather dict with temp_max_c, temp_min_c, etc.
-    - attractions: Extract the attractions list with title fields
+    - budget: full budget dict from the budget task (include total_lkr, budget_file).
+    - weather: weather dict from research (temp_max_c, temp_min_c, precip_prob_percent).
+    - attractions: list from research (objects with "title").
 
-    Do NOT skip the tool call. Do NOT write the itinerary yourself. Use
-    the Action and Action Input format to call the tool. After receiving
-    the file path, return ONLY the file path as your Final Answer.
+    Use Action: create_itinerary_file and Action Input with plan_data only.
+    Your Final Answer MUST be ONLY the file path string printed by the tool,
+    on one line — no markdown, no explanation, no fake paths.
   expected_output: >
     Just the file path string returned by the tool, nothing else.
   agent: itinerary_agent
 
 review_task:
   description: >
-    You MUST call the validate_plan tool with itinerary_path="auto" to
-    validate the latest generated itinerary. The tool will automatically
-    find the correct file.
+    You MUST call the validate_plan tool with itinerary_path="auto" so it
+    resolves the latest itinerary from outputs.
 
-    Use the Action and Action Input format to call it like this:
     Action: validate_plan
     Action Input: {{"itinerary_path": "auto"}}
 
-    After receiving validation results, write a clean final markdown
-    report with these sections:
+    Then write a markdown report with sections:
 
     ## Summary
-    Brief trip overview: {origin} to {destination}, {group_size} people,
-    {duration_days} days, dates: {travel_dates}.
+    One paragraph: {origin} to {destination}, {group_size} people,
+    {duration_days} days, dates {travel_dates}.
 
     ## Itinerary
-    Mention the destination and duration.
+    Briefly describe destination and duration.
 
     ## Budget Highlights
-    Extract from context: total_lkr (96000), total_usd (300), and
-    breakdown: lodging (43200), food (24000), transport (19200),
-    activities (7680), contingency (1920).
+    Copy totals and breakdown ONLY from the budget task output in context:
+    total_lkr, total_usd, and lodging / food / transport / activities /
+    contingency — use the real numbers from context, never placeholder values.
 
     ## Validation Results
-    Report the results from the validate_plan tool call (issues,
-    warnings, metrics).
+    Summarize issues, warnings, and metrics from the validate_plan tool output.
 
     ## Next Steps
-    - Confirm transport bookings 48 hours before travel
-    - Check weather forecast closer to departure date
-    - Reserve Temple of the Tooth tickets in advance
-    - Pack light rain gear (68% precipitation probability)
+    Practical bullets; if research weather included precip_prob_percent, mention
+    packing or timing using that number when relevant.
 
-    Return ONLY the markdown report as plain text. Do NOT wrap it in code
-    fences or JSON structures.
+    Return ONLY the markdown report as plain text. Do NOT wrap it in code fences.
   expected_output: >
     A clean markdown report as plain text with Summary, Itinerary, Budget
     Highlights, Validation Results, and Next Steps sections.

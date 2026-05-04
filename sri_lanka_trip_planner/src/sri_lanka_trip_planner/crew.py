@@ -4,6 +4,11 @@ from crewai import LLM, Agent, Crew, Process, Task
 from crewai.agents.agent_builder.base_agent import BaseAgent
 from crewai.project import CrewBase, agent, crew, task
 
+from sri_lanka_trip_planner.task_guardrails import (
+    budget_output_guardrail,
+    itinerary_output_guardrail,
+    research_output_guardrail,
+)
 from sri_lanka_trip_planner.tools import (
     BudgetTool,
     ItineraryTool,
@@ -59,13 +64,17 @@ class SriLankaTripPlanner:
 
     @task
     def research_task(self) -> Task:
-        return Task(config=self.tasks_config["research_task"])
+        return Task(
+            config=self.tasks_config["research_task"],
+            guardrail=research_output_guardrail,
+        )
 
     @task
     def budget_task(self) -> Task:
         return Task(
             config=self.tasks_config["budget_task"],
             context=[self.research_task()],
+            guardrail=budget_output_guardrail,
         )
 
     @task
@@ -73,6 +82,7 @@ class SriLankaTripPlanner:
         return Task(
             config=self.tasks_config["itinerary_task"],
             context=[self.research_task(), self.budget_task()],
+            guardrail=itinerary_output_guardrail,
         )
 
     @task

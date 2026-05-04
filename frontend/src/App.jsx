@@ -9,6 +9,8 @@ const emptyResult = {
   latest_plan: null,
   itinerary_md: "",
   budget_json: null,
+  unified_plan: null,
+  unified_report_md: "",
   errors: [],
 };
 
@@ -28,11 +30,14 @@ async function parseErrorResponse(response) {
 }
 
 function OutputDisplay({ result, status }) {
+  const unified = result.unified_report_md?.trim() || "";
   const report = result.final_report_md?.trim() || "";
   const itinerary = result.itinerary_md?.trim() || "";
   const budget = result.budget_json;
 
-  const hasAnything = Boolean(report || itinerary || budget);
+  const hasAnything = Boolean(
+    unified || report || itinerary || budget || result.unified_plan,
+  );
 
   if (status === "success" && !hasAnything) {
     return (
@@ -45,6 +50,29 @@ function OutputDisplay({ result, status }) {
 
   if (!hasAnything) {
     return null;
+  }
+
+  if (unified) {
+    return (
+      <div className="output-stack">
+        <section className="output-section">
+          <h3>Complete trip plan</h3>
+          <p className="muted section-hint">
+            Overview, places, weather, budget, daily schedule, and validation
+            in one place.
+          </p>
+          <pre className="output-plain">{result.unified_report_md}</pre>
+        </section>
+        {result.unified_plan ? (
+          <details className="structured-details">
+            <summary>Structured data (JSON)</summary>
+            <pre className="output-plain output-json">
+              {JSON.stringify(result.unified_plan, null, 2)}
+            </pre>
+          </details>
+        ) : null}
+      </div>
+    );
   }
 
   return (
@@ -110,6 +138,8 @@ export default function App() {
         latest_plan: data.latest_plan || null,
         itinerary_md: data.itinerary_md || "",
         budget_json: data.budget_json || null,
+        unified_plan: data.unified_plan ?? null,
+        unified_report_md: data.unified_report_md || "",
         errors: data.errors || [],
       });
       setStatus("success");
@@ -125,6 +155,7 @@ export default function App() {
   const showOutput =
     status === "loading" ||
     status === "success" ||
+    result.unified_report_md ||
     result.final_report_md ||
     result.itinerary_md ||
     result.budget_json;

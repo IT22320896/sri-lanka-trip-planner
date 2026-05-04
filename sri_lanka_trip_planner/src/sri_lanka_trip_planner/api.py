@@ -11,6 +11,15 @@ from pydantic import BaseModel, Field
 
 from sri_lanka_trip_planner.crew import SriLankaTripPlanner
 from sri_lanka_trip_planner.main import build_inputs
+from sri_lanka_trip_planner.task_guardrails import (
+    repair_itinerary_after_kickoff,
+    set_kickoff_inputs,
+)
+from sri_lanka_trip_planner.unified_output import (
+    build_unified_plan,
+    build_unified_report_md,
+    write_unified_artifacts,
+)
 
 app = FastAPI(title="Sri Lanka Trip Planner API")
 
@@ -28,10 +37,14 @@ class PlanRequest(BaseModel):
 
 
 class PlanResponse(BaseModel):
+    """Legacy fields preserved; prefer unified_plan + unified_report_md."""
+
     final_report_md: str
     latest_plan: Optional[Dict[str, Any]] = None
     itinerary_md: str
     budget_json: Optional[Dict[str, Any]] = None
+    unified_plan: Optional[Dict[str, Any]] = None
+    unified_report_md: str = ""
     errors: list[str] = []
 
 
@@ -75,9 +88,11 @@ def plan_trip(request: PlanRequest) -> PlanResponse:
         raise HTTPException(status_code=400, detail="Prompt is required")
 
     inputs = build_inputs(prompt)
+    set_kickoff_inputs(inputs)
 
     try:
-        SriLankaTripPlanner().crew().kickoff(inputs=inputs)
+        result = SriLankaTripPlanner().crew().kickoff(inputs=inputs)
+        repair_itinerary_after_kickoff(result)
     except Exception as exc:  # noqa: BLE001
         raise HTTPException(status_code=500, detail=str(exc))
 
@@ -105,10 +120,21 @@ def plan_trip(request: PlanRequest) -> PlanResponse:
     itinerary_md = _read_text(itinerary_path)
     budget_json = _read_json(budget_path)
 
+    unified = build_unified_plan(
+        latest_plan=latest_plan,
+        itinerary_md=itinerary_md,
+        budget_json=budget_json,
+        final_report_md=final_report_md,
+    )
+    unified_report_md = build_unified_report_md(unified)
+    write_unified_artifacts(output_dir, unified, unified_report_md)
+
     return PlanResponse(
         final_report_md=final_report_md,
         latest_plan=latest_plan,
         itinerary_md=itinerary_md,
         budget_json=budget_json,
+        unified_plan=unified,
+        unified_report_md=unified_report_md,
         errors=[],
     )

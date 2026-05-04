@@ -375,6 +375,14 @@ class TestInputParsing:
         assert inputs["origin"] == ""
         assert inputs["destination"] == ""
         assert "current_date" in inputs
+        assert inputs["weather_date"] == inputs["current_date"]
+
+    def test_build_inputs_weather_date_is_first_travel_day(self) -> None:
+        inputs = build_inputs(
+            "2-day trip from Colombo to Kandy on 2026-05-09 for 2 people"
+        )
+        assert inputs["travel_dates"] and inputs["travel_dates"][0] == "2026-05-09"
+        assert inputs["weather_date"] == "2026-05-09"
 
 
 # ---------------------------------------------------------------------------
